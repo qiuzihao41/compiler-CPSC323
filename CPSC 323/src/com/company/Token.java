@@ -14,7 +14,7 @@ public class Token {
     }
 
     public String lexer() {
-        
+
 
 
         return token;
