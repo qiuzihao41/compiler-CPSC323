@@ -1,0 +1,10 @@
+Token        Lexeme
+none    Hello
+keyword    for
+none    this
+keyword    if
+none    evan
+separator    {
+separator    (
+separator    ]
+keyword    elseif
