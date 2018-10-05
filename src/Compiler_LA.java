@@ -1,3 +1,6 @@
+import java.io.File;
+import java.util.Scanner;
+
 public class Compiler_LA {
 
     public static enum Type {
@@ -24,12 +27,9 @@ public class Compiler_LA {
 
     public Token lexer(String lexeme){
 
+        //switch case for keywords
         switch(lexeme){
-            case "[*":
-                return new Token(Type.KEYWORD, lexeme);
-            case "*]":
-                return new Token(Type.KEYWORD, lexeme);
-            case "while":
+            case "whileend":
                 return new Token(Type.KEYWORD, lexeme);
             case "whileend":
                 return new Token(Type.KEYWORD, lexeme);
@@ -45,6 +45,46 @@ public class Compiler_LA {
                 return new Token(Type.KEYWORD, lexeme);
         }
 
+        //switch case for separators
+        switch(lexeme){
+            case "(":
+                return new Token(Type.KEYWORD, lexeme);
+            case ")":
+                return new Token(Type.KEYWORD, lexeme);
+            case ",":
+                return new Token(Type.KEYWORD, lexeme);
+            case ";":
+                return new Token(Type.KEYWORD, lexeme);
+            case "{":
+                return new Token(Type.KEYWORD, lexeme);
+            case "}":
+                return new Token(Type.KEYWORD, lexeme);
+            case "[":
+                return new Token(Type.KEYWORD, lexeme);
+            case "]":
+                return new Token(Type.KEYWORD, lexeme);
+            case ".":
+                return new Token(Type.KEYWORD, lexeme);
+        }
+        //switch case for operators
+        switch(lexeme){
+            case "=":
+                return new Token(Type.KEYWORD, lexeme);
+            case "+":
+                return new Token(Type.KEYWORD, lexeme);
+            case "-":
+                return new Token(Type.KEYWORD, lexeme);
+            case "/":
+                return new Token(Type.KEYWORD, lexeme);
+            case "*":
+                return new Token(Type.KEYWORD, lexeme);
+            case ">":
+                return new Token(Type.KEYWORD, lexeme);
+            case "<":
+                return new Token(Type.KEYWORD, lexeme);
+            case "|":
+                return new Token(Type.KEYWORD, lexeme);
+        }
 
 
         for(int i = 0; i < token.length; i++) {
@@ -57,5 +97,23 @@ public class Compiler_LA {
         return new Token(Type.KEYWORD, lexeme);
     }
 
+   /* public Scanner removeComments(Scanner input){
+        String lexeme;
+        boolean comment = false;
+        while(input.hasNext()){
+            lexeme = input.next();
+            if (lexeme == "[*"){
+                comment = true;
+            }
 
+            if(comment){
+
+            }
+
+        }
+
+
+            return file;
+    }
+*/
 }
