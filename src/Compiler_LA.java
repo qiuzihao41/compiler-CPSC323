@@ -1,144 +1,105 @@
-import java.io.File;
 import java.util.Scanner;
+import java.io.*;
+import java.util.regex.*;
+import java.util.ArrayList;
 
-public class Compiler_LA {
+public class main {
 
-    public static enum Type {
-        IDENTIFIER, KEYWORD, INTEGER, REAL, OPERATOR, SEPARATOR, INVALID;
-    }
+    public static final char[] separatorsAndOps = { '(', ')', '{', '}', '[', ']', ',', ';', '.', ':', '=', '+', '-', '/', '*', '>', '<', '|' };
+    public static final String[] dubOps = { "=<", "=>", "^=", "==" };
+    public static ArrayList<String> separatedLexemes = new ArrayList<>();
 
-    public class Token{
-        private Type token;
-        private String  lexeme;
+    public static void main(String[] args) throws IOException {
+        //PrintWriter pw = new PrintWriter("test.txt");
+        // BufferedReader br = new BufferedReader(new Filereader("input.txt"));
 
-        Token(Type token, String lexeme){
-            this.token = token;
-            this.lexeme = lexeme;
-        }
+        // String line = br.readLine();
+        File file = new File("test.txt");
 
-        public void setToken(Type token){
-            this.token = token;
-        }
+        Scanner input = new Scanner(file);
 
-        public void setLexeme(String lexeme){
-            this.lexeme = lexeme;
-        }
-    }
+        String lexeme = "", preLexeme = "";
+        boolean isComment = false;
+        int commStart, commEnd;
 
-    public Token lexer(String lexeme){
+        Compiler_LA compiler = new Compiler_LA();
+        Compiler_LA.Token thisToken;
 
-        //switch case for separators
-        switch(lexeme){
-            case "(":
-                return new Token(Type.SEPARATOR, lexeme);
-            case ")":
-                return new Token(Type.SEPARATOR, lexeme);
-            case ",":
-                return new Token(Type.SEPARATOR, lexeme);
-            case ";":
-                return new Token(Type.SEPARATOR, lexeme);
-            case "{":
-                return new Token(Type.SEPARATOR, lexeme);
-            case "}":
-                return new Token(Type.SEPARATOR, lexeme);
-            case "[":
-                return new Token(Type.SEPARATOR, lexeme);
-            case "]":
-                return new Token(Type.SEPARATOR, lexeme);
-            case ".":
-                return new Token(Type.SEPARATOR, lexeme);
-            case ":":
-                return new Token(Type.SEPARATOR, lexeme);
-        }
-
-        //switch case for keywords
-        switch(lexeme){
-            case "while":
-                return new Token(Type.KEYWORD, lexeme);
-            case "whileend":
-                return new Token(Type.KEYWORD, lexeme);
-            case "if":
-                return new Token(Type.KEYWORD, lexeme);
-            case "else":
-                return new Token(Type.KEYWORD, lexeme);
-            case "ifend":
-                return new Token(Type.KEYWORD, lexeme);
-            case "do":
-                return new Token(Type.KEYWORD, lexeme);
-            case "function":
-                return new Token(Type.KEYWORD, lexeme);
-            case "$$":
-                return new Token(Type.KEYWORD, lexeme);
-            case "int":
-                return new Token(Type.KEYWORD, lexeme);
-            case "boolean":
-                return new Token(Type.KEYWORD, lexeme);
-            case "true":
-                return new Token(Type.KEYWORD, lexeme);
-            case "false":
-                return new Token(Type.KEYWORD, lexeme);
-            case "real":
-                return new Token(Type.KEYWORD, lexeme);
-            case "return":
-                return new Token(Type.KEYWORD, lexeme);
-            case "get":
-                return new Token(Type.KEYWORD, lexeme);
-            case "put":
-                return new Token(Type.KEYWORD, lexeme);
-        }
-
-        //switch case for operators
-        switch(lexeme){
-            case "=":
-                return new Token(Type.OPERATOR, lexeme);
-            case "+":
-                return new Token(Type.OPERATOR, lexeme);
-            case "-":
-                return new Token(Type.OPERATOR, lexeme);
-            case "/":
-                return new Token(Type.OPERATOR, lexeme);
-            case "*":
-                return new Token(Type.OPERATOR, lexeme);
-            case ">":
-                return new Token(Type.OPERATOR, lexeme);
-            case "<":
-                return new Token(Type.OPERATOR, lexeme);
-            case "|":
-                return new Token(Type.OPERATOR, lexeme);
-        }
-
-        //DOUBLE OPERATORS
-        switch(lexeme) {
-            case "=<":
-                return new Token(Type.OPERATOR, lexeme);
-            case "=>":
-                return new Token(Type.OPERATOR, lexeme);
-            case "^=":
-                return new Token(Type.OPERATOR, lexeme);
-            case "==":
-                return new Token(Type.OPERATOR, lexeme);
-        }
-
-        return new Token(Type.INVALID, lexeme);
-    }
-
-   /* public Scanner removeComments(Scanner input){
-        String lexeme;
-        boolean comment = false;
+        //compiler.removeComments(input);
         while(input.hasNext()){
             lexeme = input.next();
-            if (lexeme == "[*"){
-                comment = true;
+
+            //ignore comments comments
+            if(lexeme.contains("[*")) {
+                commStart = lexeme.indexOf("[*"); //index might be off
+                preLexeme = lexeme.substring(0, commStart);
+
+                isComment = true;
+                while(isComment) {
+                    if (lexeme.contains("*]")) {
+                        commEnd = lexeme.indexOf("*]"); //index might be off
+                        lexeme = lexeme.substring(commEnd + 1, lexeme.length() - 1);
+                        isComment = false;
+                    }
+                    else{
+                        if(input.hasNext()){
+                            lexeme = input.next();
+                        }
+                    }
+                }
+
+                if(!preLexeme.isEmpty()) {
+                    parseSeparatorOperator(preLexeme);
+                    for(String lexemeOpSep: separatedLexemes) {
+                        thisToken = compiler.lexer(lexemeOpSep);
+                        preLexeme = "";
+                        System.out.println(thisToken);
+                    }
+                }
             }
 
-            if(comment){
 
+            parseSeparatorOperator(lexeme);
+
+            //System.out.println(separatedLexemes.size());
+            for(String lexemeOpSep: separatedLexemes) {
+                thisToken = compiler.lexer(lexemeOpSep);
+                System.out.println(thisToken);
+            }
+        }
+    }
+
+    public static void parseSeparatorOperator(String lexeme){
+        separatedLexemes.clear();
+        int lexemeCounter = 0;
+        StringBuilder lexemeHolder = new StringBuilder();
+        boolean charSepOp = false;
+
+        for(int i = 0; i < lexeme.length(); i++) {
+            charSepOp = false;
+
+            //System.out.println(lexeme.charAt(i));
+
+            for (char separatorOp : separatorsAndOps) {
+                if (lexeme.charAt(i) == separatorOp) {
+                    charSepOp = true;
+                    if(lexemeHolder.length() > 0) {
+                        separatedLexemes.add(lexemeHolder.toString());
+                        lexemeHolder.setLength(0);
+                    }
+                    separatedLexemes.add(String.valueOf(separatorOp));
+                    break;
+                }
             }
 
+            if(!charSepOp) {
+                lexemeHolder.append(String.valueOf(lexeme.charAt(i)));
+            }
         }
 
-
-            return file;
+        if(lexemeHolder.length() > 0) {
+            separatedLexemes.add(lexemeHolder.toString());
+        }
     }
-*/
+
 }
