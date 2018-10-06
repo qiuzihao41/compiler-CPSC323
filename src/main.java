@@ -10,12 +10,12 @@ public class main {
     public static ArrayList<String> separatedLexemes = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
-        //PrintWriter pw = new PrintWriter("test.txt");
-        // BufferedReader br = new BufferedReader(new Filereader("input.txt"));
 
-        // String line = br.readLine();
+        BufferedWriter writer =  new BufferedWriter( new FileWriter("output.txt"));
+        writer.write("Token" + "\t\t\t" + "Lexeme");
+        writer.newLine();
+
         File file = new File("test.txt");
-
         Scanner input = new Scanner(file);
 
         String lexeme = "", preLexeme = "";
@@ -31,7 +31,7 @@ public class main {
 
             //ignore comments comments
             if(lexeme.contains("[*")) {
-                commStart = lexeme.indexOf("[*"); //index might be off
+                commStart = lexeme.indexOf("[*");
                 preLexeme = lexeme.substring(0, commStart);
 
                 isComment = true;
@@ -54,19 +54,25 @@ public class main {
                         thisToken = compiler.lexer(lexemeOpSep);
                         preLexeme = "";
                         System.out.println(thisToken);
+                        writer.write(thisToken.toString());
+                        writer.newLine();
                     }
                 }
             }
 
 
-            parseSeparatorOperator(lexeme);
+                parseSeparatorOperator(lexeme);
 
             //System.out.println(separatedLexemes.size());
             for(String lexemeOpSep: separatedLexemes) {
                 thisToken = compiler.lexer(lexemeOpSep);
                 System.out.println(thisToken);
+                writer.write(thisToken.toString());
+                writer.newLine();
             }
         }
+        writer.flush();
+        writer.close();
     }
 
     public static void parseSeparatorOperator(String lexeme){
