@@ -1,9 +1,13 @@
 import java.util.Scanner;
 import java.io.*;
 import java.util.regex.*;
+import java.util.ArrayList;
 
 public class main {
+    public static char[] operators = {'=', '+', '-', '/', '*', '>', '<', '|' };
+
     public static void main(String[] args) throws IOException {
+
         PrintWriter pw = new PrintWriter("test.txt");
        // BufferedReader br = new BufferedReader(new Filereader("input.txt"));
 
@@ -15,6 +19,8 @@ public class main {
         String lexeme = "", preLexeme = "", postLexeme = "";
         boolean isComment = false;
         int commStart, commEnd;
+
+        String[] separatorLexemes = new String[3];
 
 
         Compiler_LA compiler = new Compiler_LA();
@@ -50,10 +56,25 @@ public class main {
                 }
             }
 
+            //separate separators into multiple lexemes
+            hasSeparator(lexeme);
+
             thisToken = compiler.lexer(lexeme);
 
             System.out.println(thisToken);
         }
+    }
+
+    public static String[] hasSeparator(String lexeme){
+        String preLexeme = "", postLexeme = "";
+        int i = 0;
+        for(char operator: operators){
+            if(lexeme.charAt(i) != operator){
+                preLexeme +=
+            }
+        }
+
+        return new String[] {preLexeme, lexeme, postLexeme};
     }
 
 }
