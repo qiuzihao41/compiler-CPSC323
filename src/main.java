@@ -4,24 +4,23 @@ import java.util.regex.*;
 import java.util.ArrayList;
 
 public class main {
-    public static char[] operators = {'=', '+', '-', '/', '*', '>', '<', '|' };
+
+    public static final char[] separatorsAndOps = { '(', ')', '{', '}', '[', ']', ',', ';', '.', ':', '=', '+', '-', '/', '*', '>', '<', '|' };
+    public static final String[] dubOps = { "=<", "=>", "^=", "==" };
+    public static ArrayList<String> separatedLexemes = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
+        //PrintWriter pw = new PrintWriter("test.txt");
+        // BufferedReader br = new BufferedReader(new Filereader("input.txt"));
 
-        PrintWriter pw = new PrintWriter("test.txt");
-       // BufferedReader br = new BufferedReader(new Filereader("input.txt"));
-
-       // String line = br.readLine();
+        // String line = br.readLine();
         File file = new File("test.txt");
 
         Scanner input = new Scanner(file);
 
-        String lexeme = "", preLexeme = "", postLexeme = "";
+        String lexeme = "", preLexeme = "";
         boolean isComment = false;
         int commStart, commEnd;
-
-        String[] separatorLexemes = new String[3];
-
 
         Compiler_LA compiler = new Compiler_LA();
         Compiler_LA.Token thisToken;
@@ -29,52 +28,78 @@ public class main {
         //compiler.removeComments(input);
         while(input.hasNext()){
             lexeme = input.next();
-            System.out.println(lexeme);
 
             //ignore comments comments
             if(lexeme.contains("[*")) {
                 commStart = lexeme.indexOf("[*"); //index might be off
                 preLexeme = lexeme.substring(0, commStart);
+
                 isComment = true;
                 while(isComment) {
                     if (lexeme.contains("*]")) {
                         commEnd = lexeme.indexOf("*]"); //index might be off
-                        lexeme = lexeme.substring(commEnd, lexeme.length() - 1);
+                        lexeme = lexeme.substring(commEnd + 1, lexeme.length() - 1);
                         isComment = false;
                     }
                     else{
-                        while(input.hasNext()){
+                        if(input.hasNext()){
                             lexeme = input.next();
                         }
                     }
                 }
 
                 if(!preLexeme.isEmpty()) {
-                    thisToken = compiler.lexer(preLexeme);
-                    preLexeme = "";
-                    System.out.println(thisToken);
+                    parseSeparatorOperator(preLexeme);
+                    for(String lexemeOpSep: separatedLexemes) {
+                        thisToken = compiler.lexer(lexemeOpSep);
+                        preLexeme = "";
+                        System.out.println(thisToken);
+                    }
                 }
             }
 
-            //separate separators into multiple lexemes
-            hasSeparator(lexeme);
 
-            thisToken = compiler.lexer(lexeme);
+            parseSeparatorOperator(lexeme);
 
-            System.out.println(thisToken);
+            //System.out.println(separatedLexemes.size());
+            for(String lexemeOpSep: separatedLexemes) {
+                thisToken = compiler.lexer(lexemeOpSep);
+                System.out.println(thisToken);
+            }
         }
     }
 
-    public static String[] hasSeparator(String lexeme){
-        String preLexeme = "", postLexeme = "";
-        int i = 0;
-        for(char operator: operators){
-            if(lexeme.charAt(i) != operator){
-                preLexeme +=
+    public static void parseSeparatorOperator(String lexeme){
+        separatedLexemes.clear();
+        int lexemeCounter = 0;
+        StringBuilder lexemeHolder = new StringBuilder();
+        boolean charSepOp = false;
+
+        for(int i = 0; i < lexeme.length(); i++) {
+            charSepOp = false;
+
+            //System.out.println(lexeme.charAt(i));
+
+            for (char separatorOp : separatorsAndOps) {
+                if (lexeme.charAt(i) == separatorOp) {
+                    charSepOp = true;
+                    if(lexemeHolder.length() > 0) {
+                        separatedLexemes.add(lexemeHolder.toString());
+                        lexemeHolder.setLength(0);
+                    }
+                    separatedLexemes.add(String.valueOf(separatorOp));
+                    break;
+                }
+            }
+
+            if(!charSepOp) {
+                lexemeHolder.append(String.valueOf(lexeme.charAt(i)));
             }
         }
 
-        return new String[] {preLexeme, lexeme, postLexeme};
+        if(lexemeHolder.length() > 0) {
+            separatedLexemes.add(lexemeHolder.toString());
+        }
     }
 
 }
